@@ -1,7 +1,7 @@
 import sqlite3
-from domain.users.entities.UserEntity import UserEntity
-from domain.users.entities.UserId import UserId
-from domain.users.usecases.UserRepository import UserRepository
+from users.domain.entities.UserEntity import UserEntity
+from users.domain.entities.UserId import UserId
+from users.domain.usecases.UserRepository import UserRepository
 
 class UserInMemoryRepository(UserRepository):
     def __init__(self, connection):

@@ -1,11 +1,11 @@
 import sqlite3
-from domain.users.usecases.UserRepository import UserRepository
-from domain.users.services.UserService import UserService
-from adapters.gateways.UserInMemoryRepository import UserInMemoryRepository
-from adapters.gateways.UserDynamoDbRepository import UserDynamoDbRepository
+from users.domain.usecases.UserRepository import UserRepository
+from users.domain.services.UserService import UserService
+from users.adapters.gateways.UserInMemoryRepository import UserInMemoryRepository
+from users.adapters.gateways.UserDynamoDbRepository import UserDynamoDbRepository
 from flask import Flask, jsonify
-from adapters.controllers.UserWebController import UserWebController
-from domain.users.entities.UserId import UserId
+from users.adapters.controllers.UserWebController import UserWebController
+from users.domain.entities.UserId import UserId
 
 webapp = Flask(__name__,
             static_url_path='', 
@@ -37,5 +37,5 @@ setup()
 
 if __name__ == '__main__':
     #get_db_connection()
-    setup()
+    #setup()
     webapp.run(debug=True)
