@@ -1,5 +1,5 @@
 import sqlite3
-from users.domain.usecases.UserRepository import UserRepository
+from users.usecases.UserRepository import UserRepository
 from users.domain.services.UserService import UserService
 from users.adapters.gateways.UserInMemoryRepository import UserInMemoryRepository
 from users.adapters.gateways.UserDynamoDbRepository import UserDynamoDbRepository

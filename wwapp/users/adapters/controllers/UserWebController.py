@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 from werkzeug.exceptions import abort
-from users.domain.usecases.ForReadingUsers import ForReadingUsers
+from users.usecases.ForReadingUsers import ForReadingUsers
 
 class UserWebController():
 

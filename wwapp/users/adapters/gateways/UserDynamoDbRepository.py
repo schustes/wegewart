@@ -1,6 +1,6 @@
 import boto3
 
-from users.domain.usecases.UserRepository import UserRepository
+from users.usecases.UserRepository import UserRepository
 
 class UserDynamoDbRepository(UserRepository):
     def get_dynamodb_client(self):

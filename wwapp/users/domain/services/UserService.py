@@ -1,5 +1,5 @@
-from ..usecases.ForReadingUsers import ForReadingUsers
-from ..usecases.UserRepository import UserRepository
+from ...usecases.ForReadingUsers import ForReadingUsers
+from ...usecases.UserRepository import UserRepository
 
 class UserService(ForReadingUsers):
     def __init__(self, user_repository: UserRepository):
