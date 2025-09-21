@@ -1,0 +1,5 @@
+{
+   "user_id": {"S": "a8954662-6115-4c64-819c-19f68a46cee6"},
+   "first_name": {"S": "Stephan"},
+   "email": {"S": "info@xyz.net"}
+}

@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <h2>Neuen Weg anlegen</h2>
+        <form id="routeForm">
+            <div class="mb-3">
+                <label for="type" class="form-label">Typ</label>
+                <select class="form-control" id="type" name="type" required>
+                    <option value="rotblau">Regional-/Fernwanderweg</option>
+                    <option value="gelb">Örtlicher Wanderweg</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="date" class="form-label">Datum</label>
+                <input type="date" class="form-control" id="date" name="date" required>
+            </div>
+            <div class="mb-3">
+                <label for="workplace" class="form-label">Arbeitsort</label>
+                <input type="text" class="form-control" id="workplace" name="workplace">
+            </div>
+            <div class="mb-3">
+                <label for="persons" class="form-label">Beteiligte Personen</label>
+                <input type="text" class="form-control" id="persons" name="persons">
+            </div>
+            <div class="mb-3">
+                <label for="activity" class="form-label">Tätigkeit</label>
+                <input type="text" class="form-control" id="activity" name="activity" required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Bemerkungen</label>
+                <input type="text" class="form-control" id="description" name="description">
+            </div>
+            <div class="mb-3">
+                <label for="diamond_count" class="form-label">Anzahl Rauten</label>
+                <input type="number" class="form-control" id="diamond_count" name="diamond_count" min="0" value="0">
+            </div>
+            <div class="mb-3">
+                <label for="arrow_count" class="form-label">Anzahl Richtungspfeile</label>
+                <input type="number" class="form-control" id="arrow_count" name="arrow_count" min="0" value="0">
+            </div>
+            <div class="mb-3">
+                <label for="sticker_count" class="form-label">Anzahl Aufkleber (Raute/Pfeil)</label>
+                <input type="number" class="form-control" id="sticker_count" name="sticker_count" min="0" value="0">
+            </div>
+            <div class="mb-3">
+                <label for="working_hours" class="form-label">Arbeitszeit aller Beteiligten</label>
+                <input type="number" step="0.1" class="form-control" id="working_hours" name="working_hours" min="0" value="0" required>
+            </div>
+            <button type="submit" class="btn btn-success">Speichern</button>
+            <a href="{{ url_for('get_my_routes') }}" class="btn btn-secondary">Abbrechen</a>
+        </form>
+        <div id="spinner" class="text-center mt-3" style="display:none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Wird gespeichert...</span>
+            </div>
+            <div>Wird gespeichert...</div>
+        </div>        
+    </div>
+    <script>
+        document.getElementById('routeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            document.getElementById('spinner').style.display = 'block';
+            document.getElementById('spinner').scrollIntoView({ behavior: 'smooth' });
+            const type = document.getElementById('type').value;
+            const description = document.getElementById('description').value;
+            const date = document.getElementById('date').value;
+            const workplace = document.getElementById('workplace').value;
+            const persons = document.getElementById('persons').value;
+            const activity = document.getElementById('activity').value;
+            const diamond_count = document.getElementById('diamond_count').value;
+            const arrow_count = document.getElementById('arrow_count').value;
+            const sticker_count = document.getElementById('sticker_count').value;
+            const working_hours = document.getElementById('working_hours').value;
+            const response = await fetch("{{ url_for('add_route') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ 
+                    type, description, date, workplace, persons, activity, 
+                    diamond_count, arrow_count, sticker_count, working_hours 
+                })
+            });
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                document.getElementById('spinner').style.display = 'none';
+                alert("Fehler beim Speichern der Route.");
+            }
+        });
+    </script>
+{% endblock %}

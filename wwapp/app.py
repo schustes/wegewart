@@ -1,41 +1,56 @@
 import sqlite3
-from users.usecases.UserRepository import UserRepository
+from routes.adapters.controllers.ExportWebController import ExportWebController
+from routes.adapters.controllers.RouteWebController import RouteWebController
+from routes.adapters.gateways.TemplateFileRepository import TemplateFileRepository
+from routes.adapters.gateways.TemplateS3Repository import TemplateS3Repository
+from routes.domain.services.ExportService import ExportService
+from routes.domain.services.RouteService import RouteService
 from users.domain.services.UserService import UserService
-from users.adapters.gateways.UserInMemoryRepository import UserInMemoryRepository
 from users.adapters.gateways.UserDynamoDbRepository import UserDynamoDbRepository
-from flask import Flask, jsonify
+from routes.adapters.gateways.RouteDynamoDbRepository import RouteDynamoDbRepository
+from flask import Flask, jsonify, redirect, render_template, url_for
 from users.adapters.controllers.UserWebController import UserWebController
 from users.domain.entities.UserId import UserId
+from authlib.integrations.flask_client import OAuth
+import os
+from settings import SECRET, SESSION, OAUTH
+from frameworks.flask import auth, webapp
 
-webapp = Flask(__name__,
-            static_url_path='', 
-            static_folder='frameworks/flask-ui/static',
-            template_folder='frameworks/flask-ui/templates')
+#global because of flask blueprint init - needs to injected after app init
+users: UserService = None
 
-
-con: sqlite3.Connection = None
-userRepository: UserRepository = None
-userWebController = None
-users = None
-
-def get_db_connection():
-    con = sqlite3.connect('database.db')
-    con.row_factory = sqlite3.Row
-    return con
+def index():
+    return render_template('index.html')
 
 def setup():
-    global con 
-    #con = get_db_connection()
-    global userRepository
-    #userRepository = UserInMemoryRepository(con)
-    userRepository = UserDynamoDbRepository()
-    global userWebController
-    users = UserService(userRepository)
-    userWebController = UserWebController(users, webapp)
+    print("Setting up app...")
+
+    global users
+    users = UserService(UserDynamoDbRepository())
+    UserWebController(users, webapp)
+
+    routeReader = RouteService(RouteDynamoDbRepository()) #no need for two instances, refactor later
+    routeWriter = RouteService(RouteDynamoDbRepository())
+    RouteWebController(routeReader, routeWriter, webapp)
+
+    ExportWebController(webapp, export_service=ExportService(TemplateS3Repository(), 
+                                                             RouteDynamoDbRepository(),
+                                                             users))
 
 setup()
 
+#required for lambda init
+with webapp.app_context():
+        print("Starting webapp...")
+        auth.__init__()
+        auth.set_user_service(users)
+        webapp.add_url_rule('/index', view_func=index, methods=['GET'])
+
+#the normal way
 if __name__ == '__main__':
-    #get_db_connection()
-    #setup()
-    webapp.run(debug=True)
+  with webapp.app_context():
+        auth.__init__()
+        auth.set_user_service(users)
+        webapp.add_url_rule('/index', view_func=index, methods=['GET'])
+
+  webapp.run(debug=False)

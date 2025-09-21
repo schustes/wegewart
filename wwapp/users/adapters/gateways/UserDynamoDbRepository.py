@@ -1,36 +1,60 @@
 import boto3
+from flask import session
 
-from users.usecases.UserRepository import UserRepository
+from users.domain.entities.UserEntity import UserEntity
+from settings import DYNAMODB
+from users.domain.repositories.UserRepository import UserRepository
 
-class UserDynamoDbRepository(UserRepository):
+class UserDynamoDbRepository (UserRepository):
     def get_dynamodb_client(self):
-        client = boto3.resource('dynamodb', 'eu-central-1')
-        #print ("====== DynamoDB Client ===")
-        #s = client.list_tables()
-        #print(s)
-        #print ("====== DynamoDB Client ===")
+        
+        client = boto3.resource('dynamodb', 
+                                region_name=DYNAMODB.get("REGION"), 
+                                endpoint_url=DYNAMODB.get("ENDPOINT_URL"))
         return client
 
     def get_all_users(self):
         dynamodb = self.get_dynamodb_client()
-        response = dynamodb.meta.client.scan(TableName='UsersTable')
-        return response.get('Items', [])
+        table = dynamodb.Table('Users')
+        tenant_id = session.get('tenant_id')
+        
+        response = table.scan(
+            FilterExpression="tenant_id = :tenant_id_val",
+            ExpressionAttributeValues={
+                ":tenant_id_val": tenant_id
+            }
+        )
+        
+        dict_items = response.get('Items', [])        
+
+        user_entities = []
+        for item in dict_items:
+            user_entity = UserEntity(
+                user_id = item.get('user_id'),
+                first_name=item.get('first_name'),
+                last_name=item.get('last_name'),
+                email=item.get('email'),
+                tenant_id=item.get('tenant_id')
+            )
+            user_entities.append(user_entity)
+
+        return user_entities
 
     def get_user_by_id(self, user_id):
         dynamodb = self.get_dynamodb_client()
         response = dynamodb.meta.client.get_item(
-            TableName='UsersTable',
-            Key={'UserId': user_id}
-        )
-        return response.get('Item', None)
+            TableName='Users',
+            Key={'user_id': user_id}
+        )        
+        item = response.get('Item', None)
+        if (item is not None): 
+            user_entity = UserEntity(
+            user_id = item.get('user_id'),
+            first_name=item.get('first_name'),
+            last_name=item.get('last_name'),
+            email=item.get('email'),
+            tenant_id=item.get('tenant_id')
+            )
+            return user_entity
 
-    def add_user(self, user):
-        pass
-
-
-    def update_user(self, user):
-        pass
-
-
-    def delete_user(self, user_id):
-        pass    
+        return None

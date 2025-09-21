@@ -1,0 +1,7 @@
+{
+   "route_id": {"S": "a8954662-6115-4c64-819c-19f68a46cee6"},
+   "description": {"S": "Stephan test"},
+   "date": {"S": "2025-06-10"},
+   "user_id": {"S": "a8954662-6115-4c64-819c-19f68a46cee6"},
+   "tenant_id": {"S": "some_tenant_id"}
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+</head>
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} 
+      Alle Wege (Verein: {{tenant_id}})
+      {% endblock %}
+    </h1>
+
+    <table class="table ">
+      <thead>
+        <tr>
+          <td scope="col">ID</td>
+          <td scope="col">Datum</td>
+          <td scope="col">Ort</td>
+          <td scope="col">Beteiligte Personen außer User</td>
+          <td scope="col">Tätigkeit</td>
+          <td scope="col">Angelegt von</td>
+        </tr>
+      </thead>
+
+      <tbody class="table-group-divider">
+    {% for route in routes %}
+    <tr>
+      <td>
+        <a href="{{ url_for('get_route_by_id', route_id=route['route_id']) }}">
+          <b>{{ route['route_id'][:10]}}...</b>
+      </td>
+      <td>{{ route['date'] }}</td>
+      <td>{{ route['workplace'] }}</td>
+      <td>{{ route['persons'] }}</td>
+      <td>{{ route['activity'] }}</td>
+      <td>
+        <a href="{{ url_for('get_user_by_id', user_id=route['user_id']) }}">
+          <b>{{ route['user_id'][:10]}}...</b>
+      </td>
+
+    </tr>        
+    {% endfor %}
+    </tbody>
+    </table>
+
+{% endblock %}

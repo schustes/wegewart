@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Export</title>
+</head>
+
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <h2>Wege exportieren</h2>
+        <form id="exportForm">
+            <!--
+            <div class="mb-3">
+                <label for="type" class="form-label">Typ</label>
+                <select class="form-control" id="type" name="type" required>
+                    <option value="rot">rot</option>
+                    <option value="blau">blau</option>
+                    <option value="gelb">gelb</option>
+                    <option value="alle">alle</option>
+                </select>
+            </div>
+        -->
+            <div class="mb-3 w-25 p-3">
+                <label for="year" class="form-label">Berichtsjahr</label>
+                <input type="text" class="form-control" id="year" name="year" >
+            </div>
+
+            <a id="link" href="{{ url_for('export') }}?year=2025" class="btn btn-success">Exportieren</a>
+        </form>
+        <div id="spinner" class="text-center mt-3" style="display:none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Wird exportiert...</span>
+            </div>
+            <div>Wird exportiert...</div>
+        </div>        
+    </div>
+    <script>
+        document.getElementById("year").value = new Date().getFullYear();
+        document.getElementById('year').addEventListener('change', async function(e) {            
+            console.log("change year");
+            document.getElementById('link').href = "{{ url_for('export') }}?year=" + e.target.value;
+        })
+        document.getElementById('exportForm').addEventListener('submit', async function(e) {            
+            e.preventDefault();
+            document.getElementById('spinner').style.display = 'block';
+            const yearVal = document.getElementById("year").value;
+            const year = { year: parseInt(yearVal) };
+            const response = await fetch("{{ url_for('export') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ year })
+            });
+            conosle.log("response", response);
+        });
+    </script>
+{% endblock %}

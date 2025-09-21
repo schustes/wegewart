@@ -5,38 +5,77 @@ provider "aws" {
 variable "repo_url" {
   type = string
 }
+variable "AUTHORIZE_URL" {
+  type    = string
+}
+
+variable "CLIENT_ID" {
+  type    = string
+}
+
+variable "CLIENT_SECRET" {
+  type    = string
+}
+
+variable "LOGOUT_URL" {
+  type    = string
+}
+
+variable "LOGOUT_REDIRECT_URL" {
+  type    = string
+}
+
+variable "REDIRECT_URL" {
+  type    = string
+}
+
+variable "TOKEN_URL" {
+  type    = string
+}
+
 
 resource "aws_dynamodb_table" "users" {
- name = "UsersTable"
- billing_mode = "PROVISIONED"
- read_capacity = 10
- write_capacity = 5
-
- hash_key = "UserId"
+ name = "Users"
+ billing_mode = "PAY_PER_REQUEST"
+ 
+ hash_key = "user_id"
  
  attribute {  
-   name = "UserId"
+   name = "user_id"
    type = "S"  # String data type
  }     
 
  tags = {
-   Name = "UsersTable"
+   Name = "Users"
  }
 }
 
-resource "aws_dynamodb_table_item" "item" {
-  table_name = aws_dynamodb_table.users.name
-  hash_key   = aws_dynamodb_table.users.hash_key
+resource "aws_dynamodb_table" "routes" {
+ name = "Routes"
+ billing_mode = "PAY_PER_REQUEST"
 
-  item = <<ITEM
-{
-   "UserId": {"S": "a8954662-6115-4c64-819c-19f68a46cee6"},
-   "name": {"S": "Stephan"},
-   "email": {"S": "info@stephan-schuster.net"}
-}
-ITEM
-}
+ hash_key = "route_id"
+ 
+ attribute {  
+   name = "route_id"
+   type = "S" 
+ }
 
+ attribute {
+    name = "date"
+    type = "S"
+  } 
+
+ global_secondary_index {
+    name               = "date-index"
+    hash_key           = "date"
+    projection_type    = "ALL"
+  }  
+
+ tags = {
+   Name = "Routes"
+ }
+}
 
 resource "aws_iam_role" "wwapp_lambda_exec" {
   name = "wwapp_lambda_exec"
@@ -52,6 +91,58 @@ resource "aws_iam_role" "wwapp_lambda_exec" {
   })
 }
 
+#resource "aws_iam_policy" "lambda_cloudwatch_custom" {
+  #name        = "wwapp_lambda_cloudwatch_custom"
+  #description = "Custom policy for Lambda to write CloudWatch logs"
+  #policy      = jsonencode({
+    #Version = "2012-10-17"
+    #Statement = [
+      #{
+        #Effect = "Allow"
+        #Action = "logs:CreateLogGroup"
+        #Resource = "arn:aws:logs:region:accountID:*"
+      #},
+      #{
+        #Effect = "Allow"
+        #Action = [
+          #"logs:CreateLogStream",
+          #"logs:PutLogEvents"
+        #]
+        #Resource = [
+          #"arn:aws:logs:region:accountID:log-group:/aws/lambda/functionname:*"
+        #]
+      #}
+    #]
+  #})
+#}
+
+#resource "aws_iam_role_policy_attachment" "logging_access" {
+  #role       = aws_iam_role.wwapp_lambda_exec.name
+  #policy_arn = aws_iam_policy.lambda_cloudwatch_custom.arn #"arn:aws:iam::aws:policy/AWSLambdaBasicExecutionRole"
+#}
+
+
+resource "aws_dynamodb_table" "sessions" {
+  name         = "Sessions"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+
+  ttl {
+    attribute_name = "expiration"
+    enabled        = true
+  }
+
+  tags = {
+    Name = "Sessions"
+  }
+}
+
 resource "aws_iam_role_policy_attachment" "dynamodb_full_access" {
   role       = aws_iam_role.wwapp_lambda_exec.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
@@ -64,6 +155,16 @@ resource "aws_lambda_function" "wwapp_function" {
   memory_size   = 256
   timeout       = 10
   role          = aws_iam_role.wwapp_lambda_exec.arn
+  environment {
+    variables = {
+      AUTHORIZE_URL       = var.AUTHORIZE_URL
+      CLIENT_ID           = var.CLIENT_ID
+      CLIENT_SECRET       = var.CLIENT_SECRET
+      LOGOUT_REDIRECT_URL = var.LOGOUT_REDIRECT_URL
+      REDIRECT_URL        = var.REDIRECT_URL
+      TOKEN_URL           = var.TOKEN_URL
+    }
+  }
 }
 
 resource "aws_apigatewayv2_api" "wwapp_api" {

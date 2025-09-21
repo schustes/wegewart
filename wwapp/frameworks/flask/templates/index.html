@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+</head>
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Wegeverwaltung {% endblock %}</h1>
+    
+    <h2>Was?</h2>
+    <p>Diese Anwendung dient der Erfassung und Verwaltung von Wegen. Das Ergebnis kann in das Excel Template exportiert werden.</p>
+        
+    <p> Die Wege sind pro Verein organisiert. Mitglieder eines Vereins können nur die Wege dieses Vereins sehen, ändern und exportieren.</p>
+
+    <h2>Funktionsweise</h2>
+    <p>Wegepaten, Helfer und Wegewarte geben für sich oder andere Nutzer (z.B. ohne Internetzugang) Wege in "Meine Wege" ein. <br/>
+    "Wegeübersicht" zeigt alle erfassten Wege eines Vereins an.<br/>
+    "Export" erlaubt den Export aller Wege eines Vereins für ein Berichtszeitraum in das Excel-Template des Hauptvereins.<br/>
+    "Benutzer" zeigt alle Benutzer eines Vereins an.<br/>
+    </p>  
+    <h2>Nutzer werden</h2>
+    <p>Um einen neuen Benutzer anzulegen, wende dich bitte an stephan@stephan-schuster.net unter Angabe von Verein, Mail, Vor- und Nachname des Nutzers der angelegt werden soll.</p>
+
+    <h2>Aktuelle Einschränkungen</h2>
+    <p>Es gibt kein Berechtigungskonzept. Jeder User kann Wege eingeben, alle Wege die von anderen Mitgliederns des Ortvereins eingeben worden sind,
+      sehen und auch ändern. <br/><br/>
+    </p>
+    <p>Im Export wird nur das Berichtsjahr aktualisiert. 
+      Kopfdaten (Betreute Wege, Wegewart, Anzahl Beteiligte) müssen derzeit noch im Excel angepasst werden. Es gibt keine vereinsspezifischen Templates.<br/><br/>
+      In Zukunft werden diese Daten auch pro Verein in der App gepflegt werden können.<br/><br/>
+    </p>
+  
+
+{% endblock %}

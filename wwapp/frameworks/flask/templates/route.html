@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Wege Details</h2>
+    <div id="route-view">
+        <dl class="row">
+            <dt class="col-sm-3">ID</dt>
+            <dd class="col-sm-9" id="route_id">{{ route.route_id }}</dd>
+            <dt class="col-sm-3">Typ</dt>
+            <dd class="col-sm-9" id="type">
+                {% if route.type == "rotblau" %}
+                    Regional-/Fernwanderweg
+                {% else %}
+                    Örtlicher Wanderweg
+                {% endif %}
+            </dd>
+            <dt class="col-sm-3">Beschreibung</dt>
+            <dd class="col-sm-9" id="description">{{ route.description }}</dd>
+            <dt class="col-sm-3">Datum</dt>
+            <dd class="col-sm-9" id="date">{{ route.date }}</dd>
+            <dt class="col-sm-3">Arbeitsort</dt>
+            <dd class="col-sm-9" id="workplace">{{ route.workplace }}</dd>
+            <dt class="col-sm-3">Beteiligte Personen</dt>
+            <dd class="col-sm-9" id="persons">{{ route.persons }}</dd>
+            <dt class="col-sm-3">Aktivität</dt>
+            <dd class="col-sm-9" id="activity">{{ route.activity }}</dd>
+            <dt class="col-sm-3">Rauten</dt>
+            <dd class="col-sm-9" id="diamond_count">{{ route.diamond_count }}</dd>
+            <dt class="col-sm-3">Pfeile</dt>
+            <dd class="col-sm-9" id="arrow_count">{{ route.arrow_count }}</dd>
+            <dt class="col-sm-3">Aufkleber (Rauten/Pfeile)</dt>
+            <dd class="col-sm-9" id="sticker_count">{{ route.sticker_count }}</dd>
+            <dt class="col-sm-3">Arbeitsstunden</dt>
+            <dd class="col-sm-9" id="working_hours">{{ route.working_hours }}</dd>
+        </dl>
+        <button id="editBtn" class="btn btn-primary">Ändern</button>
+        <button id="deleteBtn" class="btn btn-danger">Löschen</button>
+        <a href="{{ url_for('get_my_routes') }}" class="btn btn-secondary">Zurück</a>
+    </div>
+    <form id="edit-form" style="display:none;">
+        <div class="mb-3">
+            <label for="type" class="form-label">Typ</label>
+            <select class="form-control" id="type_input" name="type_input" required>
+               <option value="rotblau" {% if route.type == 'rotblau' %}selected{% endif %}>Regional-/Fernwanderweg</option>
+               <option value="gelb" {% if route.type == 'gelb' %}selected{% endif %}>Örtlicher Wanderweg</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="description_input" class="form-label">Beschreibung</label>
+            <input type="text" class="form-control" id="description_input" name="description" value="{{ route.description }}">
+        </div>
+        <div class="mb-3">
+            <label for="date_input" class="form-label">Datum</label>
+            <input type="date" class="form-control" id="date_input" name="date" value="{{ route.date }}">
+        </div>
+        <div class="mb-3">
+            <label for="workplace_input" class="form-label">Arbeitsort</label>
+            <input type="text" class="form-control" id="workplace_input" name="workplace" value="{{ route.workplace }}">
+        </div>
+        <div class="mb-3">
+            <label for="persons_input" class="form-label">Beteiligte Personen</label>
+            <input type="text" class="form-control" id="persons_input" name="persons" value="{{ route.persons }}">
+        </div>
+        <div class="mb-3">
+            <label for="activity_input" class="form-label">Aktivität</label>
+            <input type="text" class="form-control" id="activity_input" name="activity" value="{{ route.activity }}">
+        </div>
+        <div class="mb-3">
+            <label for="diamond_count_input" class="form-label">Rauten</label>
+            <input type="number" class="form-control" id="diamond_count_input" name="diamond_count" min="0" value="{{ route.diamond_count }}">
+        </div>
+        <div class="mb-3">
+            <label for="arrow_count_input" class="form-label">Pfeile</label>
+            <input type="number" class="form-control" id="arrow_count_input" name="arrow_count" min="0" value="{{ route.arrow_count }}">
+        </div>
+        <div class="mb-3">
+            <label for="sticker_count_input" class="form-label">Aufkleber (Rauten/Pfeile)</label>
+            <input type="number" class="form-control" id="sticker_count_input" name="sticker_count" min="0" value="{{ route.sticker_count }}">
+        </div>
+        <div class="mb-3">
+            <label for="working_hours_input" class="form-label">Arbeitsstunden</label>
+            <input type="number" step="0.1" class="form-control" id="working_hours_input" name="working_hours" min="0" value="{{ route.working_hours }}">
+        </div>
+        <button type="submit" class="btn btn-success">Ändern</button>
+        <button type="button" id="cancelEditBtn" class="btn btn-secondary">Abbrechen</button>
+    </form>
+    <div id="spinner_update" class="text-center mt-3" style="display:none;">
+       <div class="spinner-border text-primary" role="status">
+           <span class="visually-hidden">Wird gespeichert...</span>
+       </div>
+       <div>Wird gespeichert...</div>
+    </div>        
+    <div id="spinner_delete" class="text-center mt-3" style="display:none;">
+       <div class="spinner-border text-primary" role="status">
+           <span class="visually-hidden">Wird gelöscht...</span>
+       </div>
+       <div>Wird gelöscht...</div>
+    </div>        
+
+</div>
+<script>
+    // Show edit form
+    document.getElementById('editBtn').onclick = function() {
+        document.getElementById('route-view').style.display = 'none';
+        document.getElementById('edit-form').style.display = 'block';
+    };
+    // Cancel edit
+    document.getElementById('cancelEditBtn').onclick = function() {
+        document.getElementById('edit-form').style.display = 'none';
+        document.getElementById('route-view').style.display = 'block';
+    };
+    // Update route
+    document.getElementById('edit-form').onsubmit = async function(e) {
+        e.preventDefault();
+        document.getElementById('spinner_update').style.display = 'block';
+        document.getElementById('spinner_update').scrollIntoView({ behavior: 'smooth' });
+
+        const route_id = "{{ route.route_id }}";
+        const data = {
+            type: document.getElementById('type_input').value,
+            description: document.getElementById('description_input').value,
+            date: document.getElementById('date_input').value,
+            workplace: document.getElementById('workplace_input').value,
+            persons: document.getElementById('persons_input').value,
+            activity: document.getElementById('activity_input').value,
+            diamond_count: document.getElementById('diamond_count_input').value,
+            arrow_count: document.getElementById('arrow_count_input').value,
+            sticker_count: document.getElementById('sticker_count_input').value,
+            working_hours: document.getElementById('working_hours_input').value
+        };
+        const response = await fetch(`/app/my-routes/${route_id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            document.getElementById('spinner_update').style.display = 'none';            
+            alert("Update fehlgeschlagen.");
+        }
+    };
+    // Delete route
+    document.getElementById('deleteBtn').onclick = async function() {
+        if (!confirm("Wirklich löschen?")) return;
+        
+        document.getElementById('spinner_delete').style.display = 'block';
+        document.getElementById('spinner_delete').scrollIntoView({ behavior: 'smooth' });
+
+        const route_id = "{{ route.route_id }}";
+        const response = await fetch(`/app/my-routes/${route_id}`, {
+            method: "DELETE"
+        });
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            document.getElementById('spinner_delete').style.display = 'none';            
+            alert("Löschen fehlgeschlagen.");
+        }
+    };
+</script>
+{% endblock %}

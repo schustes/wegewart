@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+</head>
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Benutzer (Verein: {{tenant_id}}) {% endblock %}</h1>
+
+    <table class="table ">
+      <thead>
+        <tr>
+          <td scope="col">ID</td>
+          <td scope="col">Vorname</td>
+          <td scope="col">Nachname</td>
+          <td scope="col">Mail</td>
+          <td scope="col">Verein</td>
+        </tr>
+      </thead>
+
+      <tbody class="table-group-divider">
+    {% for user in users %}
+    <tr>
+      <td>
+        <a href="{{ url_for('get_user_by_id', user_id=user['user_id']) }}">
+          <h5>{{ user['user_id']}}</h5>
+        </a>
+      </td>
+      <td>{{ user['first_name'] }}</td>
+      <td>{{ user['last_name'] }}</td>
+      <td>{{ user['email'] }}</td>
+      <td>{{ user['tenant_id'] }}</td>
+    </tr>        
+    {% endfor %}
+    </tbody>
+    </table>
+{% endblock %}

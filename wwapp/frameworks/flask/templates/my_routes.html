@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+</head>
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} 
+      Meine Wege
+      {% endblock %}
+    </h1>
+
+    <table class="table ">
+      <thead>
+        <tr>
+          <td scope="col">ID</td>
+          <td scope="col">Datum</td>
+          <td scope="col">Ort</td>
+          <td scope="col">Aktivität</td>
+        </tr>
+      </thead>
+
+      <tbody class="table-group-divider">
+    {% for route in routes %}
+    <tr>
+      <td>
+        <a href="{{ url_for('get_route_by_id', route_id=route['route_id']) }}">
+          <h5>{{ route['route_id']}}</h5>
+      </td>
+      <td>{{ route['date'] }}</td>
+      <td>{{ route['workplace'] }}</td>
+      <td>{{ route['activity'] }}</td>
+    </tr>        
+    {% endfor %}
+    </tbody>
+    </table>
+
+  <a href="{{ url_for('add_route_form') }}" class="btn btn-primary mb-3">Neuen Weg anlegen</a>
+
+{% endblock %}

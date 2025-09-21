@@ -1,0 +1,5 @@
+{
+   "user_id": {"S": "some_id"},
+   "first_name": {"S": "Stephan"},
+   "email": {"S": "info2@xyz.net"}
+}
