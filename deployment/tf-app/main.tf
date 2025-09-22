@@ -161,6 +161,7 @@ resource "aws_lambda_function" "wwapp_function" {
       CLIENT_ID           = var.CLIENT_ID
       CLIENT_SECRET       = var.CLIENT_SECRET
       LOGOUT_REDIRECT_URL = var.LOGOUT_REDIRECT_URL
+      LOGOUT_URL          = var.LOGOUT_URL
       REDIRECT_URL        = var.REDIRECT_URL
       TOKEN_URL           = var.TOKEN_URL
     }

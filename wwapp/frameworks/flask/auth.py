@@ -65,7 +65,7 @@ def logout():
         f"?client_id={OAUTH.get("CLIENT_ID")}"
         f"&response_type=code"
         f"&scope=openid"
-        f"&logout_uri={OAUTH.get("REDIRECT_URL")}"
+        #f"&logout_uri={OAUTH.get("REDIRECT_URL")}"
         f"&redirect_uri={OAUTH.get("LOGOUT_REDIRECT_URL")}"
     )
     return redirect(logout_url)
